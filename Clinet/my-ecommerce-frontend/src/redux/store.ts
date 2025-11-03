@@ -1,11 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import filterReducer from "./filterSlice";
-import authReducer from "./authSlice"; // import it
+import authReducer from "./authSlice";
+import cartReducer from "./cartSlice";
+import wishlistReducer from "./wishlistSlice";
 
 export const store = configureStore({
   reducer: {
     filters: filterReducer,
-    auth: authReducer, // add it here ✅
+    auth: authReducer,
+    cart: cartReducer,
+    wishlist: wishlistReducer,
   },
 });
 

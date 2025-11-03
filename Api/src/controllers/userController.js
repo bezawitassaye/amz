@@ -8,6 +8,7 @@ const JWT_SECRET = "your_jwt_secret_key"; // better to store in .env
 // SIGNUP
 export const signup = async (req, res) => {
   try {
+    console.log("Signup body:", req.body);
     const { full_name, email, password } = req.body;
 
     if (!full_name || !email || !password)

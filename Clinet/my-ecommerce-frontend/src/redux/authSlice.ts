@@ -39,11 +39,11 @@ export const login = createAsyncThunk(
 export const signup = createAsyncThunk(
   "auth/signup",
   async (
-    { name, email, password }: { name: string; email: string; password: string },
+    { full_name, email, password }: { full_name: string; email: string; password: string },
     thunkAPI
   ) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/signup", { name, email, password });
+      const res = await axios.post("http://localhost:5000/api/auth/signup", { full_name, email, password });
       const { token, user } = res.data;
 
       localStorage.setItem("token", token);
@@ -53,6 +53,7 @@ export const signup = createAsyncThunk(
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: "auth",

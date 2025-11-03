@@ -9,8 +9,13 @@ const PORT = 5000;
 // Enable CORS for all origins (for development)
 app.use(cors());
 
+// Add middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
 app.get('/api/products', fetchProducts);
-app.use("/api/users", userRoutes);
+app.use("/api/auth", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

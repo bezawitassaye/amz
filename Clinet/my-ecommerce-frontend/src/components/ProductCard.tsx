@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../types";
 import { ShoppingCart, X, Heart, ArrowUp, ArrowDown } from "lucide-react";
-import type { RootState } from "../redux/store";
+import type { RootState, AppDispatch } from "../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setCategory, toggleType } from "../redux/filterSlice";
 import { login, signup } from "../redux/authSlice";
 
-import type { AppDispatch, } from "../redux/store";
-
 export default function ProductList() {
   const dispatch = useDispatch<AppDispatch>();
 
-
   const [products, setProducts] = useState<Product[]>([]);
-  const { category, types } = useSelector((state: RootState) => state.filters);
+  const { category, types, searchQuery, minPrice, maxPrice } = useSelector(
+    (state: RootState) => state.filters
+  );
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
   const [sortPrice, setSortPrice] = useState<"asc" | "desc" | null>(null);
-  const searchQuery = useSelector((state: RootState) => state.filters.searchQuery);
-  const { minPrice, maxPrice } = useSelector((state: RootState) => state.filters);
- const { isAuthenticated, token, user } = useSelector((state: RootState) => state.auth);
 
   // Auth popup state
   const [showAuthPopup, setShowAuthPopup] = useState(false);
@@ -27,9 +25,6 @@ export default function ProductList() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  dispatch(login({ email, password }));
-dispatch(signup({ name, email, password }));
-
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,7 +93,8 @@ dispatch(signup({ name, email, password }));
       setAuthMode("login");
       return;
     }
-    alert("Item added to cart!");
+    // Just alert instead of popup
+    alert("Item added to cart/wishlist!");
   };
 
   // Handle Login / Signup
@@ -114,7 +110,7 @@ dispatch(signup({ name, email, password }));
       const body =
         authMode === "login"
           ? { email, password }
-          : { name, email, password };
+          : { full_name: name, email, password };
 
       const res = await fetch(url, {
         method: "POST",
@@ -123,18 +119,20 @@ dispatch(signup({ name, email, password }));
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || "Something went wrong");
 
-      // Store token in localStorage & Redux
+      // Store token in localStorage
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", data.user?.name || email);
+      localStorage.setItem("user", data.user?.full_name || email);
+
+      // Dispatch login/signup once after successful response
       if (authMode === "login") {
-    await dispatch(login({ email, password }));
-  } else {
-    await dispatch(signup({ name, email, password }));
-  }
-  setShowAuthPopup(false);
+        await dispatch(login({ email, password }));
+      } else {
+        await dispatch(signup({ full_name: name, email, password }));
+      }
+
+      // Reset form after successful auth
       setShowAuthPopup(false);
       setEmail("");
       setPassword("");
@@ -204,8 +202,8 @@ dispatch(signup({ name, email, password }));
                 onClick={handleAddToCartOrWishlist}
               />
               <div className="pb-10"></div>
-              <img src={p.photo} alt={p.title} className="w-full h-60 object-contain rounded-t-xl " />
-              <div className="p-4 ">
+              <img src={p.photo} alt={p.title} className="w-full h-60 object-contain rounded-t-xl" />
+              <div className="p-4">
                 <h2 className="font-semibold text-lg text-gray-600 line-clamp-2">{p.title}</h2>
                 <div className="flex justify-between items-center pt-4">
                   <div className="flex flex-col gap-0">
